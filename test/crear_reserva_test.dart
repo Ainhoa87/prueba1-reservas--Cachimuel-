@@ -39,4 +39,109 @@ void main() {
     expect(resultado.mensaje, 'La hora de fin debe ser posterior a la de inicio');
     expect(repositorio.reservas, isEmpty);
   });
+
+  final casosSolapamiento = <({
+    String nombre,
+    String salaId,
+    DateTime inicio,
+    DateTime fin,
+    bool aceptada,
+  })>[
+    (
+      nombre: 'solapamiento parcial al inicio',
+      salaId: 'Sala A',
+      inicio: hora(8, 30),
+      fin: hora(9, 30),
+      aceptada: false,
+    ),
+    (
+      nombre: 'solapamiento parcial al final',
+      salaId: 'Sala A',
+      inicio: hora(9, 30),
+      fin: hora(10, 30),
+      aceptada: false,
+    ),
+    (
+      nombre: 'intervalo contenido dentro de la reserva existente',
+      salaId: 'Sala A',
+      inicio: hora(9, 15),
+      fin: hora(9, 45),
+      aceptada: false,
+    ),
+    (
+      nombre: 'intervalo que contiene la reserva existente',
+      salaId: 'Sala A',
+      inicio: hora(8, 30),
+      fin: hora(10, 30),
+      aceptada: false,
+    ),
+    (
+      nombre: 'intervalo exactamente igual',
+      salaId: 'Sala A',
+      inicio: hora(9),
+      fin: hora(10),
+      aceptada: false,
+    ),
+    (
+      nombre: 'intervalo anterior que termina cuando empieza el existente',
+      salaId: 'Sala A',
+      inicio: hora(8),
+      fin: hora(9),
+      aceptada: true,
+    ),
+    (
+      nombre: 'intervalo posterior que empieza cuando termina el existente',
+      salaId: 'Sala A',
+      inicio: hora(10),
+      fin: hora(11),
+      aceptada: true,
+    ),
+    (
+      nombre: 'intervalo separado antes de la reserva existente',
+      salaId: 'Sala A',
+      inicio: hora(8),
+      fin: hora(8, 30),
+      aceptada: true,
+    ),
+    (
+      nombre: 'intervalo separado después de la reserva existente',
+      salaId: 'Sala A',
+      inicio: hora(10, 30),
+      fin: hora(11),
+      aceptada: true,
+    ),
+    (
+      nombre: 'intervalo solapado en otra sala',
+      salaId: 'Sala B',
+      inicio: hora(9, 30),
+      fin: hora(10, 30),
+      aceptada: true,
+    ),
+  ];
+
+  for (final caso in casosSolapamiento) {
+    test('solapamiento: ${caso.nombre}', () async {
+      await crearReserva(SolicitudReserva(
+        salaId: 'Sala A',
+        usuarioId: 'u1',
+        inicio: hora(9),
+        fin: hora(10),
+      ));
+
+      final resultado = await crearReserva(SolicitudReserva(
+        salaId: caso.salaId,
+        usuarioId: 'u2',
+        inicio: caso.inicio,
+        fin: caso.fin,
+      ));
+
+      expect(resultado.aceptada, caso.aceptada);
+      if (caso.aceptada) {
+        expect(repositorio.reservas, hasLength(2));
+      } else {
+        expect(resultado.mensaje, 'La sala ya está reservada en ese horario');
+        expect(repositorio.reservas, hasLength(1));
+      }
+    });
+  }
 }
