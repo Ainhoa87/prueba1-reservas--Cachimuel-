@@ -21,23 +21,47 @@ para tener dónde trabajar con mi grupo.
    reserva queda registrada a mi nombre.
 2. **Dado** que elijo como inicio las 10:00 y como fin las 09:00, **Cuando** intento reservar,
    **Entonces** la reserva se rechaza con el mensaje "La hora de fin debe ser posterior a la de inicio".
+3. **Dado** que ya existe una reserva para la sala A de 09:00 a 10:00, **Cuando** intento reservar
+   esa misma sala de 09:30 a 10:30, **Entonces** la reserva se rechaza con el mensaje exacto
+   "La sala ya está reservada en ese horario".
+4. **Dado** que ya existe una reserva para la sala A de 09:00 a 10:00, **Cuando** intento reservar
+   esa misma sala de 09:15 a 09:45, **Entonces** la reserva se rechaza con el mensaje exacto
+   "La sala ya está reservada en ese horario".
+5. **Dado** que ya existe una reserva para la sala A de 09:00 a 10:00, **Cuando** intento reservar
+   esa misma sala de 08:30 a 10:30, **Entonces** la reserva se rechaza con el mensaje exacto
+   "La sala ya está reservada en ese horario".
+6. **Dado** que ya existe una reserva para la sala A de 09:00 a 10:00, **Cuando** intento reservar
+   esa misma sala de 09:00 a 10:00, **Entonces** la reserva se rechaza con el mensaje exacto
+   "La sala ya está reservada en ese horario".
+7. **Dado** que ya existe una reserva para la sala A de 09:00 a 10:00, **Cuando** intento reservar
+   esa misma sala de 10:00 a 11:00, **Entonces** la reserva queda registrada, porque los intervalos
+   que solo comparten un extremo no se solapan.
+8. **Dado** que ya existe una reserva para la sala A de 09:00 a 10:00, **Cuando** intento reservar
+   la sala B de 09:30 a 10:30, **Entonces** la reserva queda registrada, porque las reservas de
+   salas distintas no se solapan entre sí.
 
 ### Edge Cases
 
-- ¿Qué pasa si la sala ya está ocupada en ese horario?
+- Dos reservas de la misma sala se solapan cuando comparten cualquier parte del intervalo, aunque
+  una esté contenida dentro de la otra o ambas tengan exactamente las mismas horas.
+- El inicio de cada intervalo está incluido y el fin está excluido; por eso, una reserva que empieza
+  exactamente cuando termina otra no se solapa con ella.
 
 ## Requirements
 
 ### Functional Requirements
 
 - **FR-001**: El estudiante elige una sala, una hora de inicio y una hora de fin.
-- **FR-002**: La pantalla `ReservaPage` usa un `DropdownButton` para las salas y `showTimePicker`
-  para las horas.
-- **FR-003**: El estado del formulario se maneja con `setState` dentro de
-  `lib/presentation/reserva_page.dart`.
-- **FR-004**: La reserva se guarda en la tabla `reservas` de Supabase usando el paquete
-  `supabase_flutter`.
-- **FR-005**: La hora de fin debe ser posterior a la hora de inicio.
+- **FR-002**: Una reserva confirmada queda registrada a nombre del estudiante para la sala y el
+  intervalo elegidos.
+- **FR-003**: La hora de fin debe ser posterior a la hora de inicio.
+- **FR-004**: No se confirma una reserva si su intervalo se solapa con el de otra reserva de la
+  misma sala. Se consideran intervalos con inicio incluido y fin excluido; compartir únicamente el
+  instante de inicio o fin no constituye solapamiento.
+- **FR-005**: Si el intervalo solicitado se solapa con otra reserva de la misma sala, la reserva se
+  rechaza con el mensaje exacto "La sala ya está reservada en ese horario".
+- **FR-006**: Las reservas de salas distintas no se excluyen entre sí, aunque sus intervalos se
+  solapen.
 
 ### Key Entities
 
